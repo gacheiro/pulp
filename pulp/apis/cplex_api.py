@@ -34,6 +34,7 @@ class CPLEX_CMD(LpSolver_CMD):
         maxMemory=None,
         maxNodes=None,
         mip_start=False,
+        reoptimizeFixedMip=True,
     ):
         """
         :param bool mip: if False, assume LP even if integer variables
@@ -51,6 +52,7 @@ class CPLEX_CMD(LpSolver_CMD):
         :param int maxNodes: max number of nodes during branching. Stops the solving when reached.
         :param bool mip_start: deprecated for warmStart
         :param float timelimit: deprecated for timeLimit
+        :param bool reoptimizeFixedMip: re-optimize the problem as a fixed mip after solving it (default is True).
         """
         if timelimit is not None:
             warnings.warn("Parameter timelimit is being depreciated for timeLimit")
@@ -84,6 +86,7 @@ class CPLEX_CMD(LpSolver_CMD):
             gapAbs=gapAbs,
             logPath=logPath,
         )
+        self.reoptimizeFixedMip = reoptimizeFixedMip
 
     def defaultPath(self):
         return self.executableExtension("cplex")
@@ -125,10 +128,12 @@ class CPLEX_CMD(LpSolver_CMD):
         if lp.isMIP():
             if self.mip:
                 cplex_cmds += "mipopt\n"
-                cplex_cmds += "change problem fixed\n"
+                if self.reoptimizeFixedMip:
+                    cplex_cmds += "change problem fixed\noptimize\n"
             else:
-                cplex_cmds += "change problem lp\n"
-        cplex_cmds += "optimize\n"
+                cplex_cmds += "change problem lp\noptimize\n"
+        else:
+            cplex_cmds += "optimize\n"
         cplex_cmds += "write " + tmpSol + "\n"
         cplex_cmds += "quit\n"
         cplex_cmds = cplex_cmds.encode("UTF-8")

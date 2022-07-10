@@ -9,6 +9,7 @@
     dropped packaged choco
     fixed bugs
     deprecated 'indexs' parameter LpVariable dicts and matrix
+    added 'reoptimizeFixedMip' param to CPLEX_CMD to make the fixed mip re-optimization optional
 2.5.1 2021-09-28
     updated docs
     fixed minor issues
